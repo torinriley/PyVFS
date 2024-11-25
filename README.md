@@ -32,6 +32,6 @@ The **Virtual File System (VFS) CLI** is a Python-based command-line tool that s
 ## Getting Started
 1. Clone the repository:
    ```bash
-   git clone https://github.com/torinriley/pyvfs.git
+   git clone https://github.com/torinriley/PyVFS.git
    cd vfs-cli
 
