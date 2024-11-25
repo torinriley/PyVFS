@@ -126,6 +126,7 @@ class VirtualFileSystem:
             current = current["parent"]
         path_parts.reverse()
         return os.path.join(*path_parts, path)
+
     
 
     def create_boilerplate(self, template_name):
@@ -162,3 +163,104 @@ class VirtualFileSystem:
         else:
             raise Exception(f"Unknown boilerplate template: '{template_name}'. Supported templates are: django, react, python.")
         
+
+    #git commands    
+
+    def git_init(self):
+        """
+        Initialize a Git repository in the base path.
+        """
+        try:
+            subprocess.run(["git", "init", self.base_path], check=True)
+            print("✔ Initialized a new Git repository.")
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Git initialization failed: {e}")
+    
+
+    def git_status(self):
+        """
+        Show the Git status of the repository.
+        """
+        try:
+            result = subprocess.run(
+                ["git", "-C", self.base_path, "status"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            print(result.stdout)
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Git status check failed: {e}")
+    
+
+
+    def git_add(self, filename):
+        """
+        Stage a file for Git commit.
+        """
+    # Check if the file exists in the VFS
+        if filename not in self.current["children"] or self.current["children"][filename]["type"] != "file":
+            raise Exception(f"File '{filename}' does not exist or is not a file in the current directory.")
+
+    # Get the full real path of the file
+        real_path = os.path.join(self.base_path, self._get_real_path(filename))
+
+    # Add the file to the Git index
+        try:
+            subprocess.run(["git", "-C", self.base_path, "add", real_path], check=True)
+            print(f"✔ File '{filename}' added to Git staging.")
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Failed to add '{filename}' to Git staging: {e}")
+    
+
+    def git_commit(self, message):
+        """
+        Commit changes to the Git repository with a message.
+        """
+        if not message:
+            raise Exception("Commit message cannot be empty.")
+
+        try:
+            subprocess.run(["git", "-C", self.base_path, "commit", "-m", message], check=True)
+            print(f"✔ Changes committed with message: '{message}'.")
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Git commit failed: {e}")
+        
+
+
+    #commands for vcs
+
+
+    def git_add_remote(self, remote_name, url):
+        """
+        Add a remote repository (e.g., GitHub) to the local repository.
+        """
+        try:
+            subprocess.run(
+                    ["git", "-C", self.base_path, "remote", "add", remote_name, url],
+                    check=True
+                )
+            print(f"✔ Remote '{remote_name}' added with URL '{url}'.")
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Failed to add remote '{remote_name}': {e}")
+        
+    def git_push(self, branch="main"):
+        """
+        Push committed changes to the remote repository.
+        """
+        try:
+            subprocess.run(["git", "-C", self.base_path, "push", "-u", "origin", branch], check=True)
+            print(f"✔ Changes pushed to remote branch '{branch}'.")
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Git push failed: {e}")
+        
+    def git_pull(self, branch="main"):
+        """
+        Pull changes from the remote repository.
+    """
+        try:
+            subprocess.run(["git", "-C", self.base_path, "pull", "origin", branch], check=True)
+            print(f"✔ Changes pulled from remote branch '{branch}'.")
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Git pull failed: {e}")
+    

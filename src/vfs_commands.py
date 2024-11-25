@@ -45,30 +45,46 @@ class CommandHandler:
                     print("Error: Missing arguments. Usage: move <file> <target_directory>")
                 else:
                     self.vfs.move(args[1], args[2])
+            
+            
+            elif cmd == "del":
+                if len(args) < 2:
+                    print("Error: Missing argument. Usage: del <name>")
+                else:
+                    self.vfs.delete(args[1])
 
             elif cmd == "git":
-                if args[1] == "init":
-                    self.vfs.git_init()
-                    print("Initialized a new Git repository.")
-                elif args[1] == "status":
-                    self.vfs.git_status()
-                    print("Displayed Git status.")
-                elif args[1] == "add":
-                    self.vfs.git_add(args[2])
-                    print(f"Added '{args[2]}' to Git staging.")
-                elif args[1] == "commit":
-                    message = " ".join(args[2:])
-                    self.vfs.git_commit(message)
-                    print(f"Committed changes with message: '{message}'.")
-                else:
-                    print(f"Unknown Git subcommand: {args[1]}")
-
-            elif cmd == "boilerplate":
-                self.vfs.create_boilerplate(args[1])
-                print(f"Boilerplate '{args[1]}' created successfully.")
-
-            else:
-                print(f"Unknown command: '{cmd}'. Type 'help' for a list of commands.")
+                        if len(args) < 2:
+                            print("Error: Missing Git subcommand.")
+                        elif args[1] == "init":
+                            self.vfs.git_init()
+                            print("✔ Initialized a new Git repository.")
+                        elif args[1] == "status":
+                            self.vfs.git_status()
+                        elif args[1] == "add":
+                            if len(args) < 3:
+                                print("Error: Missing file name for Git add.")
+                            else:
+                                self.vfs.git_add(args[2])
+                        elif args[1] == "commit":
+                            if len(args) < 3:
+                                print("Error: Missing commit message.")
+                            else:
+                                message = " ".join(args[2:])
+                                self.vfs.git_commit(message)
+                        elif args[1] == "remote" and args[2] == "add":
+                            if len(args) < 4:
+                                print("Error: Missing remote name or URL. Usage: git remote add <name> <url>")
+                            else:
+                                self.vfs.git_add_remote(args[3], args[4])
+                        elif args[1] == "push":
+                            branch = args[2] if len(args) > 2 else "main"
+                            self.vfs.git_push(branch)
+                        elif args[1] == "pull":
+                            branch = args[2] if len(args) > 2 else "main"
+                            self.vfs.git_pull(branch)
+                        else:
+                            print(f"❌ Unknown Git subcommand: {args[1]}")
 
         except Exception as e:
             print(f"Error: {e}")
